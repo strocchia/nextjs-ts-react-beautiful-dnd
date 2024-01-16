@@ -20,6 +20,13 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+## Kudos
+
+- DnD app format
+  - https://github.com/amy-juan-li/example-dnd-todo/tree/main
+- Zustand inspiration
+  - https://github.com/HamedBahram/next-zustand/blob/main/lib/store.ts
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
