@@ -12,11 +12,20 @@ import {
   ResponderProvided,
 } from "react-beautiful-dnd";
 import Todos from "@/components/Todos";
-import { Status, Todo, TodosStatus, TodosView } from "@/lib/todoTypes";
+import {
+  ConvexTodo,
+  Status,
+  Todo,
+  TodosStatus,
+  TodosView,
+} from "@/lib/todoTypes";
 import { cn } from "@/lib/helpers";
 import { BsCalendarWeek, BsFillKanbanFill, BsKanbanFill } from "react-icons/bs";
 import InputField from "@/components/InputField";
 import { useTaskStore } from "@/lib/zustStore";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 
 export default function Home() {
   const [title, setTitle] = useState<string>("");
@@ -24,19 +33,32 @@ export default function Home() {
   // const [todoTodos, setTodoTodos] = useState<Todo[]>([]);
   // const [progressTodos, setProgressTodos] = useState<Todo[]>([]);
   // const [doneTodos, setDoneTodos] = useState<Todo[]>([]);
+  const [activeId, setActiveId] = useState<Id<"dnd_todos">>(
+    "" as Id<"dnd_todos">
+  );
 
   const {
     addNewOne: addToStore,
-    todos,
-    activeTask,
+    // todos,
+    // activeTask,
     onDrag,
     updateStatus,
   } = useTaskStore();
+
+  const todos = useQuery(api.todos.get) || [];
+  const createTodo = useMutation(api.todos.create);
+  const updateTodoStat = useMutation(api.todos.updateStatus);
 
   const todoTodos = todos.filter((t) => t.status === "TODO");
   const progressTodos = todos.filter((p) => p.status === "IN_PROGRESS");
   const doneTodos = todos.filter((d) => d.status === "DONE");
   const backlogTodos = todos.filter((b) => b.status === "BACKLOG");
+
+  const mondayTodos = todos.filter((t) => t.dueDay === "Monday");
+  const tuesdayTodos = todos.filter((t) => t.dueDay === "Tuesday");
+  const wednesdayTodos = todos.filter((t) => t.dueDay === "Wednesday");
+  const thursdayTodos = todos.filter((t) => t.dueDay === "Thursday");
+  const fridayTodos = todos.filter((t) => t.dueDay === "Friday");
 
   useEffect(() => {
     // let todoTodos = window.localStorage.getItem("todoTodos");
@@ -86,7 +108,14 @@ export default function Home() {
     // //   todos: [...todoTodos, newTodo],
     // // });
 
-    addToStore(title);
+    // addToStore(title);
+
+    createTodo({
+      title: title,
+      status: "TODO",
+      dueDay: "Monday",
+      completed: false,
+    });
 
     setTitle("");
   };
@@ -100,6 +129,8 @@ export default function Home() {
     console.log(start);
 
     onDrag(start.draggableId);
+
+    setActiveId(start.draggableId as Id<"dnd_todos">);
   };
 
   const handleDragEnd = async (
@@ -108,9 +139,9 @@ export default function Home() {
   ) => {
     const { source, destination } = result;
 
-    if (!destination || !activeTask) return;
+    if (!destination || !activeId) return;
 
-    let add: Todo;
+    let add: ConvexTodo;
     let newStatus: Status;
 
     const dropContainerId = source.droppableId as TodosStatus;
@@ -125,7 +156,15 @@ export default function Home() {
       add = doneTodos[source.index];
       doneTodos.splice(source.index, 1);
     } else {
-      add = { id: "", title: "", status: "TODO", completed: false };
+      add = {
+        _id: "" as Id<"dnd_todos">,
+        _creationTime: Date.now(),
+        title: "",
+        status: "TODO",
+        dueDay: "Monday",
+        completed: false,
+        updatedTime: Date.now(),
+      };
     }
 
     switch (destination.droppableId as TodosStatus) {
@@ -149,7 +188,9 @@ export default function Home() {
         break;
     }
 
-    updateStatus(activeTask?.id, newStatus);
+    // updateStatus(activeTask?.id, newStatus);
+
+    updateTodoStat({ id: activeId, status: newStatus });
   };
 
   return (
@@ -157,30 +198,38 @@ export default function Home() {
       <div className="p-2">
         <div className="flex flex-col items-center min-h-100vh py-4">
           <h2 className="text-2xl font-semibold">Task This</h2>
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-4 mt-2 items-center">
             <span
               className={cn(
-                "text-3xl text-gray-300 cursor-pointer",
-                view === TodosView.KanbanView && "text-gray-900"
+                "text-3xl text-gray-500 cursor-pointer",
+                view === TodosView.KanbanView &&
+                  "text-gray-300 outline outline-offset-2 outline-slate-300"
               )}
               onClick={() => setView(TodosView.KanbanView)}
             >
               <BsFillKanbanFill />
             </span>
             <span
-              onClick={() => setView(TodosView.NoView)}
+              onClick={() => setView(TodosView.CalendarView)}
               className={cn(
-                "text-3xl text-gray-300 cursor-pointer",
-                view !== TodosView.KanbanView && "text-gray-900"
+                "text-3xl text-gray-500 cursor-pointer",
+                view !== TodosView.KanbanView &&
+                  "text-gray-300 outline outline-offset-2 outline-slate-300"
               )}
             >
               <BsCalendarWeek />
             </span>
           </div>
-          <div className="flex mt-2">
-            <span className="text-xs text-gray-100 italic">
-              {view === TodosView.KanbanView ? "Kanban" : "Calendar ... TBD"}
+          <div className="flex gap-12 mt-3">
+            <span
+              className={cn(
+                "text-sm text-gray-300 italic",
+                view === TodosView.CalendarView && "ml-[5.7rem]"
+              )}
+            >
+              {view === TodosView.KanbanView ? "Kanban" : "Calendar"}
             </span>
+            <span />
           </div>
           <InputField title={title} setTitle={setTitle} addNew={addNewOne} />
           <Todos
@@ -194,6 +243,16 @@ export default function Home() {
             setTodoTodos={() => {}}
             setProgressTodos={() => {}}
             setDoneTodos={() => {}}
+            mondayTodos={mondayTodos}
+            setMondayTodos={() => {}}
+            tuesdayTodos={tuesdayTodos}
+            setTuesdayTodos={() => {}}
+            wednesdayTodos={wednesdayTodos}
+            setWednesdayTodos={() => {}}
+            thursdayTodos={thursdayTodos}
+            setThursdayTodos={() => {}}
+            fridayTodos={fridayTodos}
+            setFridayTodos={() => {}}
           />
         </div>
       </div>

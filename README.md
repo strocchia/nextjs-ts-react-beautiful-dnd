@@ -23,9 +23,9 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 ## Kudos
 
 - DnD app format
-  - https://github.com/amy-juan-li/example-dnd-todo/tree/main
+  - <a href="https://github.com/amy-juan-li/example-dnd-todo/tree/main" target="_blank">example-dnd-todo</a>
 - Zustand inspiration
-  - https://github.com/HamedBahram/next-zustand/blob/main/lib/store.ts
+  - <a href="https://github.com/HamedBahram/next-zustand/blob/main/lib/store.ts" target="_blank">next-zustand</a>
 
 ## Learn More
 
