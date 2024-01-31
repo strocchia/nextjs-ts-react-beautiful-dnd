@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/helpers";
 import { ConvexTodo, Todo, TodosStatus, TodosView } from "@/lib/todoTypes";
-import { useTaskStore } from "@/lib/zustStore";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { AiFillDelete, AiFillEdit, AiOutlineCheck } from "react-icons/ai";
 import { MdDone } from "react-icons/md";
 import { toast } from "sonner";
 import KanbanView from "./KanbanView";
 import CalendarView from "./CalendarView";
+import {
+  BsArrow90DegUp,
+  BsArrowBarUp,
+  BsArrowUp,
+  BsArrowUpCircle,
+} from "react-icons/bs";
 
 type Props = {
   view: TodosView;
@@ -28,6 +33,10 @@ type Props = {
   setThursdayTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
   fridayTodos: ConvexTodo[];
   setFridayTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
+  saturdayTodos: ConvexTodo[];
+  setSaturdayTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
+  sundayTodos: ConvexTodo[];
+  setSundayTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
 };
 
 const Todos = ({
@@ -49,10 +58,19 @@ const Todos = ({
   setThursdayTodos,
   fridayTodos,
   setFridayTodos,
+  saturdayTodos,
+  setSaturdayTodos,
+  sundayTodos,
+  setSundayTodos,
 }: Props) => {
-  // if (view !== TodosView.KanbanView) {
-  //   return null;
-  // }
+  if (view === TodosView.NoView) {
+    return (
+      <div className="flex gap-8 items-center">
+        <BsArrowUpCircle size={20} />
+        Pick a view above
+      </div>
+    );
+  }
 
   return (
     <>
@@ -78,10 +96,11 @@ const Todos = ({
           setThursdayTodos={setThursdayTodos}
           fridayTodos={fridayTodos}
           setFridayTodos={setFridayTodos}
+          saturdayTodos={saturdayTodos}
+          setSaturdayTodos={setSaturdayTodos}
+          sundayTodos={sundayTodos}
+          setSundayTodos={setSundayTodos}
         />
-      )}
-      {view === TodosView.NoView && (
-        <div>No View here ... under construction</div>
       )}
     </>
   );

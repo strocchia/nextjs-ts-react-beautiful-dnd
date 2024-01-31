@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ConvexTodo, Todo } from "@/lib/todoTypes";
-import { useTaskStore } from "@/lib/zustStore";
 import { toast } from "sonner";
 import { Draggable } from "react-beautiful-dnd";
 import { AiFillDelete, AiFillEdit } from "react-icons/ai";
 import { MdDone } from "react-icons/md";
 import { cn } from "@/lib/helpers";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 const Item = ({
   index,
@@ -15,16 +16,18 @@ const Item = ({
 }: {
   index: number;
   todo: ConvexTodo;
-  todos: ConvexTodo[];
-  setTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
+  todos?: ConvexTodo[];
+  setTodos?: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
 }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedTitle, setEditedTitle] = useState<string>(todo.title);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // const { updateTitle, updateCompleted, updateStatus, removeOne } =
-  //   useTaskStore();
+  const updateTitle = useMutation(api.todos.updateTitle);
+  const updateCompleted = useMutation(api.todos.updateCompleted);
+  const updateStatus = useMutation(api.todos.updateStatus);
+  const removeOne = useMutation(api.todos.remove);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -42,36 +45,17 @@ const Item = ({
   const submitEdit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // setTodos(
-    //   todos.map((t) => (t.id === todo.id ? { ...t, title: editedTitle } : t))
-    // );
-
-    // updateTitle(todo.id, editedTitle);
+    updateTitle({ id: todo._id, title: editedTitle });
 
     setIsEditing(false);
   };
 
   const doDelete = () => {
-    // const filteredTodos = todos.filter((t) => t.id !== todo.id);
-    //
-    // setTodos(filteredTodos);
-    //
-    // saveToLocalstorage({
-    //   status: todo.status,
-    //   todos: filteredTodos,
-    // });
-    //
-    // removeOne(todo.id);
+    removeOne({ id: todo._id });
   };
 
   const doDone = () => {
     toast("Not implemented");
-
-    // updateCompleted(todo.id);
-
-    // todo.completed
-    //   ? updateStatus(todo.id, "TODO")
-    //   : updateStatus(todo.id, "DONE");
   };
 
   return (

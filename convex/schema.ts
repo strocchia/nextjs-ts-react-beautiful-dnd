@@ -26,7 +26,9 @@ export default defineSchema({
     completed: v.boolean(),
     updatedTime: v.number(),
     user: v.optional(v.id("users")),
-  }),
+  })
+    .index("by_dueDay", ["dueDay"])
+    .index("by_status", ["status"]),
   users: defineTable({
     name: v.string(),
     tokenIdentifier: v.string(),

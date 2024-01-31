@@ -15,6 +15,10 @@ type Props = {
   setThursdayTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
   fridayTodos: ConvexTodo[];
   setFridayTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
+  saturdayTodos: ConvexTodo[];
+  setSaturdayTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
+  sundayTodos: ConvexTodo[];
+  setSundayTodos: React.Dispatch<React.SetStateAction<ConvexTodo[]>>;
 };
 
 const CalendarView = ({
@@ -28,6 +32,10 @@ const CalendarView = ({
   setThursdayTodos,
   fridayTodos,
   setFridayTodos,
+  saturdayTodos,
+  setSaturdayTodos,
+  sundayTodos,
+  setSundayTodos,
 }: Props) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 w-[90%] gap-6 m-4">
@@ -165,6 +173,62 @@ const CalendarView = ({
                 index={index}
                 todos={fridayTodos}
                 setTodos={setFridayTodos}
+              />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+      <Droppable droppableId={WeekdayEnum.Saturday}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={cn(
+              `${DayColorScheme.Saturday.bgColor} p-5 rounded-sm`,
+              snapshot.isDraggingOver && "opacity-80"
+            )}
+          >
+            <span
+              className={`${DayColorScheme.Saturday.titleColor} text-2xl font-semibold`}
+            >
+              Saturday
+            </span>
+            {saturdayTodos.map((item, index) => (
+              <Item
+                key={item._id}
+                todo={item}
+                index={index}
+                todos={saturdayTodos}
+                setTodos={setSaturdayTodos}
+              />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+      <Droppable droppableId={WeekdayEnum.Sunday}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={cn(
+              `${DayColorScheme.Sunday.bgColor} p-5 rounded-sm`,
+              snapshot.isDraggingOver && "opacity-80"
+            )}
+          >
+            <span
+              className={`${DayColorScheme.Sunday.titleColor} text-2xl font-semibold`}
+            >
+              Sunday
+            </span>
+            {sundayTodos.map((item, index) => (
+              <Item
+                key={item._id}
+                todo={item}
+                index={index}
+                todos={sundayTodos}
+                setTodos={setSundayTodos}
               />
             ))}
             {provided.placeholder}

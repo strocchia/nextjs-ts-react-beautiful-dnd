@@ -30,85 +30,50 @@ import { Id } from "../../convex/_generated/dataModel";
 export default function Home() {
   const [title, setTitle] = useState<string>("");
   const [view, setView] = useState<TodosView>(TodosView.KanbanView);
-  // const [todoTodos, setTodoTodos] = useState<Todo[]>([]);
-  // const [progressTodos, setProgressTodos] = useState<Todo[]>([]);
-  // const [doneTodos, setDoneTodos] = useState<Todo[]>([]);
+
   const [activeId, setActiveId] = useState<Id<"dnd_todos">>(
     "" as Id<"dnd_todos">
   );
-
-  const {
-    addNewOne: addToStore,
-    // todos,
-    // activeTask,
-    onDrag,
-    updateStatus,
-  } = useTaskStore();
 
   const todos = useQuery(api.todos.get) || [];
   const createTodo = useMutation(api.todos.create);
   const updateTodoStat = useMutation(api.todos.updateStatus);
 
-  const todoTodos = todos.filter((t) => t.status === "TODO");
-  const progressTodos = todos.filter((p) => p.status === "IN_PROGRESS");
-  const doneTodos = todos.filter((d) => d.status === "DONE");
-  const backlogTodos = todos.filter((b) => b.status === "BACKLOG");
+  const todoTodos = useQuery(api.todos.getByStatus, { status: "TODO" }) ?? [];
+  const progressTodos =
+    useQuery(api.todos.getByStatus, {
+      status: "IN_PROGRESS",
+    }) ?? [];
+  const doneTodos = useQuery(api.todos.getByStatus, { status: "DONE" }) ?? [];
+  const backlogTodos =
+    useQuery(api.todos.getByStatus, { status: "BACKLOG" }) ?? [];
 
-  const mondayTodos = todos.filter((t) => t.dueDay === "Monday");
-  const tuesdayTodos = todos.filter((t) => t.dueDay === "Tuesday");
-  const wednesdayTodos = todos.filter((t) => t.dueDay === "Wednesday");
-  const thursdayTodos = todos.filter((t) => t.dueDay === "Thursday");
-  const fridayTodos = todos.filter((t) => t.dueDay === "Friday");
+  const mondayTodos =
+    useQuery(api.todos.getByDueDay, { dueDay: "Monday" }) ?? [];
+  const tuesdayTodos =
+    useQuery(api.todos.getByDueDay, { dueDay: "Tuesday" }) ?? [];
+  const wednesdayTodos =
+    useQuery(api.todos.getByDueDay, {
+      dueDay: "Wednesday",
+    }) ?? [];
+  const thursdayTodos =
+    useQuery(api.todos.getByDueDay, { dueDay: "Thursday" }) ?? [];
+  const fridayTodos =
+    useQuery(api.todos.getByDueDay, { dueDay: "Friday" }) ?? [];
+  const saturdayTodos =
+    useQuery(api.todos.getByDueDay, { dueDay: "Saturday" }) ?? [];
+  const sundayTodos =
+    useQuery(api.todos.getByDueDay, { dueDay: "Sunday" }) ?? [];
 
   useEffect(() => {
-    // let todoTodos = window.localStorage.getItem("todoTodos");
-    // let progressTodos = window.localStorage.getItem("progressTodos");
-    // let doneTodos = window.localStorage.getItem("doneTodos");
-
-    // todoTodos && setTodoTodos(JSON.parse(todoTodos));
-    // progressTodos && setProgressTodos(JSON.parse(progressTodos));
-    // doneTodos && setDoneTodos(JSON.parse(doneTodos));
-
-    // manually hydrate
+    // manually hydrate the task store
     useTaskStore.persist.rehydrate();
   }, []);
-
-  // useEffect(() => {
-  //   console.log("hit1a");
-  //   if (typeof window !== undefined) {
-  //     console.log("hit1b");
-  //     window.localStorage.setItem("todoTodos", JSON.stringify(todoTodos));
-  //     window.localStorage.setItem(
-  //       "progressTodos",
-  //       JSON.stringify(progressTodos)
-  //     );
-  //     window.localStorage.setItem("doneTodos", JSON.stringify(doneTodos));
-  //   }
-  // }, [todoTodos, progressTodos, doneTodos]);
 
   const addNewOne = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title) return;
-
-    // const newTodo: Todo = {
-    //   // id: Date.now().toString(),
-    //   id: uuid(),
-    //   title: title,
-    //   status: "TODO",
-    //   completed: false,
-    // };
-
-    // setTodoTodos((prev) => {
-    //   return [...todoTodos, newTodo];
-    // });
-
-    // // saveToLocalstorage({
-    // //   status: "TODO",
-    // //   todos: [...todoTodos, newTodo],
-    // // });
-
-    // addToStore(title);
 
     createTodo({
       title: title,
@@ -125,10 +90,6 @@ export default function Home() {
     provided: ResponderProvided
   ) => {
     if (!start) return;
-
-    console.log(start);
-
-    onDrag(start.draggableId);
 
     setActiveId(start.draggableId as Id<"dnd_todos">);
   };
@@ -188,8 +149,6 @@ export default function Home() {
         break;
     }
 
-    // updateStatus(activeTask?.id, newStatus);
-
     updateTodoStat({ id: activeId, status: newStatus });
   };
 
@@ -213,7 +172,7 @@ export default function Home() {
               onClick={() => setView(TodosView.CalendarView)}
               className={cn(
                 "text-3xl text-gray-500 cursor-pointer",
-                view !== TodosView.KanbanView &&
+                view === TodosView.CalendarView &&
                   "text-gray-300 outline outline-offset-2 outline-slate-300"
               )}
             >
@@ -227,9 +186,15 @@ export default function Home() {
                 view === TodosView.CalendarView && "ml-[5.7rem]"
               )}
             >
-              {view === TodosView.KanbanView ? "Kanban" : "Calendar"}
+              {view === TodosView.KanbanView ? (
+                "Kanban"
+              ) : view === TodosView.CalendarView ? (
+                "Calendar"
+              ) : (
+                <span className="inline-block" />
+              )}
             </span>
-            <span />
+            <span className="inline-block" />
           </div>
           <InputField title={title} setTitle={setTitle} addNew={addNewOne} />
           <Todos
@@ -237,9 +202,6 @@ export default function Home() {
             todoTodos={todoTodos}
             progressTodos={progressTodos}
             doneTodos={doneTodos}
-            // setTodoTodos={setTodoTodos}
-            // setProgressTodos={setProgressTodos}
-            // setDoneTodos={setDoneTodos}
             setTodoTodos={() => {}}
             setProgressTodos={() => {}}
             setDoneTodos={() => {}}
@@ -253,6 +215,10 @@ export default function Home() {
             setThursdayTodos={() => {}}
             fridayTodos={fridayTodos}
             setFridayTodos={() => {}}
+            saturdayTodos={saturdayTodos}
+            setSaturdayTodos={() => {}}
+            sundayTodos={sundayTodos}
+            setSundayTodos={() => {}}
           />
         </div>
       </div>
